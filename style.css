@@ -7,24 +7,12 @@
 }
 
 body {
-    background: var(--tg-theme-bg-color, #0D0D0D);
-    color: var(--tg-theme-text-color, #FFFFFF);
+    background: #0D0D0D;
+    color: #FFFFFF;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     padding: 16px;
     padding-bottom: 80px;
     min-height: 100vh;
-}
-
-/* CSS Переменные */
-:root {
-    --bg: #0D0D0D;
-    --card: #1A1A1A;
-    --card-light: #2A2A2A;
-    --accent: #FF4444;
-    --accent-dark: #CC3333;
-    --text: #FFFFFF;
-    --text-secondary: #888888;
-    --border: #3A3A3A;
 }
 
 .app-container {
@@ -32,23 +20,14 @@ body {
     margin: 0 auto;
 }
 
-/* ============ АНИМАЦИИ ============ */
+/* Анимации */
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
+    from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes scaleIn {
-    from { transform: scale(0.95); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-
-.screen, .modal-content, .exercise-item {
+.screen, .page, .modal-content {
     animation: fadeIn 0.3s ease;
-}
-
-.modal.active {
-    animation: fadeIn 0.2s ease;
 }
 
 /* ============ ЭКРАН РЕГИСТРАЦИИ ============ */
@@ -66,14 +45,14 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg);
+    background: #0D0D0D;
     z-index: 1000;
     padding: 20px;
     overflow-y: auto;
 }
 
 .register-card {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 24px;
     padding: 28px;
     margin-top: 20px;
@@ -94,7 +73,7 @@ body {
 .input-group label {
     display: block;
     margin-bottom: 8px;
-    color: var(--text-secondary);
+    color: #888888;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
@@ -105,18 +84,17 @@ body {
 .input-group select {
     width: 100%;
     padding: 14px 16px;
-    background: var(--card-light);
-    border: 1px solid var(--border);
+    background: #2A2A2A;
+    border: 1px solid #3A3A3A;
     border-radius: 14px;
-    color: var(--text);
+    color: #FFFFFF;
     font-size: 16px;
     transition: all 0.3s;
 }
 
 .input-group input:focus {
     outline: none;
-    border-color: var(--accent);
-    transform: scale(1.01);
+    border-color: #FF4444;
 }
 
 .radio-group {
@@ -129,7 +107,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--text);
+    color: #FFFFFF;
     text-transform: none;
     font-weight: normal;
     cursor: pointer;
@@ -138,7 +116,7 @@ body {
 /* ============ КНОПКИ ============ */
 .btn-primary {
     width: 100%;
-    background: var(--accent);
+    background: #FF4444;
     color: white;
     border: none;
     padding: 16px;
@@ -152,13 +130,13 @@ body {
 
 .btn-primary:active {
     transform: scale(0.97);
-    background: var(--accent-dark);
+    background: #CC3333;
 }
 
 .btn-secondary {
     width: 100%;
-    background: var(--card-light);
-    color: var(--text);
+    background: #2A2A2A;
+    color: #FFFFFF;
     border: none;
     padding: 12px;
     border-radius: 12px;
@@ -175,8 +153,8 @@ body {
 .btn-add {
     width: 100%;
     background: transparent;
-    border: 2px dashed var(--accent);
-    color: var(--accent);
+    border: 2px dashed #FF4444;
+    color: #FF4444;
     padding: 14px;
     border-radius: 14px;
     margin-top: 8px;
@@ -186,15 +164,14 @@ body {
 }
 
 .btn-add:active {
-    background: var(--accent);
+    background: #FF4444;
     color: white;
-    transform: scale(0.98);
 }
 
 .btn-cancel {
     flex: 1;
-    background: var(--card-light);
-    color: var(--text);
+    background: #2A2A2A;
+    color: #FFFFFF;
     border: none;
     padding: 14px;
     border-radius: 12px;
@@ -204,7 +181,7 @@ body {
 
 .btn-save {
     flex: 1;
-    background: var(--accent);
+    background: #FF4444;
     color: white;
     border: none;
     padding: 14px;
@@ -225,7 +202,7 @@ body {
 }
 
 .check-status {
-    color: var(--accent);
+    color: #FF4444;
     font-size: 13px;
     display: inline-block;
     padding: 6px 14px;
@@ -235,7 +212,7 @@ body {
 
 /* ============ ПРОФИЛЬ ============ */
 .profile-card {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 24px;
     padding: 20px;
     margin-bottom: 20px;
@@ -248,7 +225,7 @@ body {
 }
 
 .profile-stats {
-    color: var(--text-secondary);
+    color: #888888;
     font-size: 14px;
     margin-bottom: 20px;
 }
@@ -261,7 +238,7 @@ body {
 }
 
 .metric {
-    background: var(--card-light);
+    background: #2A2A2A;
     padding: 14px;
     border-radius: 16px;
     transition: all 0.2s;
@@ -274,7 +251,7 @@ body {
 
 .metric-label {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #888888;
     margin-bottom: 6px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -283,22 +260,22 @@ body {
 .metric-value {
     font-size: 26px;
     font-weight: bold;
-    color: var(--accent);
+    color: #FF4444;
 }
 
 .metric-unit,
 .metric-status {
     font-size: 10px;
-    color: var(--text-secondary);
+    color: #888888;
     margin-top: 4px;
 }
 
-/* ============ НАВИГАЦИЯ ============ */
+/* ============ НАВИГАЦИЯ (ТОЧНО КАК НА СКРИНАХ) ============ */
 .nav-tabs {
     display: flex;
     gap: 8px;
     margin-bottom: 20px;
-    background: var(--card);
+    background: #1A1A1A;
     padding: 8px;
     border-radius: 20px;
 }
@@ -307,7 +284,7 @@ body {
     flex: 1;
     background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: #888888;
     padding: 12px;
     border-radius: 14px;
     cursor: pointer;
@@ -317,13 +294,22 @@ body {
 }
 
 .nav-tab.active {
-    background: var(--accent);
+    background: #FF4444;
     color: white;
+}
+
+/* ============ СТРАНИЦЫ (ВКЛАДКИ) ============ */
+.page {
+    display: block;
+}
+
+.page.hidden {
+    display: none;
 }
 
 /* ============ УПРАЖНЕНИЯ ============ */
 .exercises-section {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 24px;
     padding: 20px;
 }
@@ -334,11 +320,12 @@ body {
 }
 
 .exercise-item {
-    background: var(--card-light);
+    background: #2A2A2A;
     border-radius: 16px;
     padding: 16px;
     margin-bottom: 12px;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 .exercise-item:active {
@@ -353,26 +340,26 @@ body {
 
 .exercise-stats {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #888888;
     margin-bottom: 4px;
 }
 
 .exercise-pr {
-    color: var(--accent);
+    color: #FF4444;
     font-weight: bold;
 }
 
 .exercise-progress {
     margin-top: 10px;
     height: 4px;
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 4px;
     overflow: hidden;
 }
 
 .exercise-progress-bar {
     height: 100%;
-    background: var(--accent);
+    background: #FF4444;
     transition: width 0.5s ease;
 }
 
@@ -385,7 +372,7 @@ body {
 }
 
 .calendar-day {
-    background: var(--card-light);
+    background: #2A2A2A;
     padding: 12px 6px;
     text-align: center;
     border-radius: 12px;
@@ -395,17 +382,17 @@ body {
 }
 
 .calendar-day.checked {
-    background: var(--accent);
+    background: #FF4444;
     color: white;
 }
 
 .calendar-day.today {
-    border: 2px solid var(--accent);
+    border: 2px solid #FF4444;
 }
 
 /* ============ ГРАФИК ВЕСА ============ */
 .weight-chart {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 24px;
     padding: 20px;
     margin-top: 20px;
@@ -416,7 +403,7 @@ body {
     justify-content: space-between;
     margin-top: 20px;
     padding-top: 16px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid #3A3A3A;
 }
 
 .weight-stat {
@@ -426,14 +413,14 @@ body {
 
 .weight-stat-label {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: #888888;
     margin-bottom: 4px;
 }
 
 .weight-stat-value {
     font-size: 18px;
     font-weight: bold;
-    color: var(--accent);
+    color: #FF4444;
 }
 
 canvas {
@@ -443,15 +430,14 @@ canvas {
 
 /* ============ ИСТОРИЯ ============ */
 .history-list {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 24px;
     padding: 20px;
 }
 
 .history-item {
     padding: 14px;
-    border-bottom: 1px solid var(--border);
-    transition: all 0.2s;
+    border-bottom: 1px solid #3A3A3A;
 }
 
 .history-item:last-child {
@@ -466,7 +452,7 @@ canvas {
 
 .history-details {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: #888888;
     line-height: 1.5;
 }
 
@@ -490,12 +476,11 @@ canvas {
 }
 
 .modal-content {
-    background: var(--card);
+    background: #1A1A1A;
     border-radius: 28px;
     padding: 28px;
     width: 100%;
     max-width: 400px;
-    animation: scaleIn 0.2s ease;
 }
 
 .modal-content h3 {
@@ -510,7 +495,7 @@ canvas {
 }
 
 .calc-result {
-    background: var(--card-light);
+    background: #2A2A2A;
     padding: 14px;
     border-radius: 14px;
     margin: 16px 0;
@@ -520,10 +505,7 @@ canvas {
 }
 
 /* ============ УТИЛИТЫ ============ */
-.text-center {
-    text-align: center;
-}
-
+.text-center { text-align: center; }
 .mt-2 { margin-top: 8px; }
 .mt-3 { margin-top: 12px; }
 .mt-4 { margin-top: 16px; }
