@@ -1,270 +1,252 @@
-/**
- * Модуль упражнений
- * Добавление упражнений, подходов, расчет 1RM, прогресс
- */
-
 window.Exercises = {
     currentExerciseId: null,
-    currentCalculatorExerciseId: null,
-
+    currentSetId: null,
+    
     init() {
         document.getElementById('addExerciseBtn').onclick = () => this.showAddModal();
         document.getElementById('addExerciseBtn2').onclick = () => this.showAddModal();
-        
-        // Привязываем глобальные функции
-        window.saveSet = () => this.saveSet();
-        window.createExercise = () => this.create();
     },
-
-    showAddModal() {
-        document.getElementById('newExerciseName').value = '';
-        document.getElementById('addExerciseModal').classList.add('active');
+    
+    showAddModal() { 
+        document.getElementById('newExerciseName').value = ''; 
+        document.getElementById('addExerciseModal').classList.add('active'); 
     },
-
+    
     create() {
         const name = document.getElementById('newExerciseName').value.trim();
-        if (!name) {
-            alert('Введите название упражнения');
-            return;
-        }
-
+        if (!name) { alert('Введите название'); return; }
         const exercises = Storage.getExercises();
-        exercises.push({
-            id: Date.now().toString(),
-            name: name,
-            sets: [],
-            pr: 0,
-            createdAt: new Date().toISOString()
-        });
+        exercises.push({ id: Date.now().toString(), name, sets: [], pr: 0 });
         Storage.setExercises(exercises);
-
         document.getElementById('addExerciseModal').classList.remove('active');
         window.dispatchEvent(new Event('dataUpdated'));
     },
-
-    showAddSet(exerciseId, exerciseName) {
-        this.currentExerciseId = exerciseId;
-        document.getElementById('modalExerciseName').textContent = `Добавить: ${exerciseName}`;
+    
+    showAddSet(id, name) {
+        this.currentExerciseId = id;
+        document.getElementById('modalExerciseName').textContent = `Добавить: ${name}`;
         document.getElementById('setWeight').value = '';
         document.getElementById('setReps').value = '';
         document.getElementById('addSetModal').classList.add('active');
     },
-
+    
     saveSet() {
         const weight = parseFloat(document.getElementById('setWeight').value);
         const reps = parseInt(document.getElementById('setReps').value);
-
-        if (!weight || !reps || weight <= 0 || reps <= 0) {
-            alert('Введите корректные вес и повторения');
-            return;
-        }
-
+        if (!weight || !reps) { alert('Введите данные'); return; }
         const exercises = Storage.getExercises();
-        const exercise = exercises.find(e => e.id === this.currentExerciseId);
-        
-        if (exercise) {
-            const newSet = {
+        const ex = exercises.find(e => e.id === this.currentExerciseId);
+        if (ex) {
+            const newSet = { 
                 id: Date.now().toString(),
-                date: new Date().toISOString().split('T')[0],
-                time: new Date().toLocaleTimeString(),
-                weight: weight,
-                reps: reps
+                date: new Date().toISOString().split('T')[0], 
+                weight, 
+                reps 
             };
-            exercise.sets.push(newSet);
-
-            // Расчет и обновление PR (1ПМ)
-            const oneRM = this.calculateOneRM(weight, reps);
-            if (!exercise.pr || oneRM > exercise.pr) {
-                exercise.pr = oneRM;
-            }
-
+            ex.sets.push(newSet);
+            const oneRM = Math.round(weight * (1 + reps/30));
+            if (!ex.pr || oneRM > ex.pr) ex.pr = oneRM;
             Storage.setExercises(exercises);
         }
-
         document.getElementById('addSetModal').classList.remove('active');
         window.dispatchEvent(new Event('dataUpdated'));
     },
-
-    calculateOneRM(weight, reps) {
-        // Формула Бжицки: вес * (1 + повторения/30)
-        return Math.round(weight * (1 + reps / 30));
-    },
-
-    calculatePR(exercise) {
-        if (!exercise.sets || exercise.sets.length === 0) return 0;
-        return Math.max(...exercise.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
-    },
-
-    calculateProgress(exercise) {
-        if (!exercise.sets || exercise.sets.length < 2) return 0;
-        
-        const firstPR = this.calculateOneRM(exercise.sets[0].weight, exercise.sets[0].reps);
-        const lastPR = this.calculateOneRM(
-            exercise.sets[exercise.sets.length - 1].weight,
-            exercise.sets[exercise.sets.length - 1].reps
-        );
-        
-        const progress = ((lastPR - firstPR) / firstPR) * 100;
-        return Math.round(Math.max(0, Math.min(100, progress)));
-    },
-
-    showCalculator(exerciseId) {
-        this.currentCalculatorExerciseId = exerciseId;
+    
+    calculateOneRM(w, r) { return Math.round(w * (1 + r/30)); },
+    
+    showCalculator(id) {
+        this.currentCalculatorId = id;
         document.getElementById('calcWeight').value = '';
         document.getElementById('calcReps').value = '';
         document.getElementById('calcResult').innerHTML = 'Введите вес и повторения';
         document.getElementById('oneRMModal').classList.add('active');
-
-        // Автоматический расчет при вводе
-        document.getElementById('calcWeight').oninput = () => this.calculateAndDisplayRM();
-        document.getElementById('calcReps').oninput = () => this.calculateAndDisplayRM();
+        document.getElementById('calcWeight').oninput = () => this.calcAndDisplay();
+        document.getElementById('calcReps').oninput = () => this.calcAndDisplay();
     },
-
-    calculateAndDisplayRM() {
-        const weight = parseFloat(document.getElementById('calcWeight').value);
-        const reps = parseInt(document.getElementById('calcReps').value);
-        
-        if (weight && reps && weight > 0 && reps > 0) {
-            const oneRM = this.calculateOneRM(weight, reps);
-            document.getElementById('calcResult').innerHTML = `🏆 Ваш 1ПМ: <span style="color: #FF4444; font-size: 22px;">${oneRM}</span> кг`;
+    
+    calcAndDisplay() {
+        const w = parseFloat(document.getElementById('calcWeight').value);
+        const r = parseInt(document.getElementById('calcReps').value);
+        if (w && r) {
+            document.getElementById('calcResult').innerHTML = `🏆 1ПМ: <span style="color:#FF4444">${this.calculateOneRM(w, r)}</span> кг`;
         } else {
             document.getElementById('calcResult').innerHTML = 'Введите вес и повторения';
         }
     },
-
+    
     saveFromCalculator() {
-        const weight = parseFloat(document.getElementById('calcWeight').value);
-        const reps = parseInt(document.getElementById('calcReps').value);
-
-        if (!weight || !reps) {
-            alert('Введите вес и повторения');
-            return;
+        const w = parseFloat(document.getElementById('calcWeight').value);
+        const r = parseInt(document.getElementById('calcReps').value);
+        if (!w || !r) { alert('Введите данные'); return; }
+        const exercises = Storage.getExercises();
+        const ex = exercises.find(e => e.id === this.currentCalculatorId);
+        if (ex) {
+            ex.sets.push({ 
+                id: Date.now().toString(),
+                date: new Date().toISOString().split('T')[0], 
+                weight: w, 
+                reps: r 
+            });
+            const oneRM = this.calculateOneRM(w, r);
+            if (!ex.pr || oneRM > ex.pr) ex.pr = oneRM;
+            Storage.setExercises(exercises);
         }
-
-        if (this.currentCalculatorExerciseId) {
-            const exercises = Storage.getExercises();
-            const exercise = exercises.find(e => e.id === this.currentCalculatorExerciseId);
-            
-            if (exercise) {
-                const newSet = {
-                    id: Date.now().toString(),
-                    date: new Date().toISOString().split('T')[0],
-                    time: new Date().toLocaleTimeString(),
-                    weight: weight,
-                    reps: reps
-                };
-                exercise.sets.push(newSet);
-
-                const oneRM = this.calculateOneRM(weight, reps);
-                if (!exercise.pr || oneRM > exercise.pr) {
-                    exercise.pr = oneRM;
-                }
-
-                Storage.setExercises(exercises);
-                alert(`✅ Сохранено! ${weight}кг × ${reps} = 1ПМ ${oneRM}кг`);
-            }
-        }
-
         document.getElementById('oneRMModal').classList.remove('active');
         window.dispatchEvent(new Event('dataUpdated'));
     },
-
-    showExerciseHistory(exerciseId) {
+    
+    // НОВЫЙ МЕТОД: Показать детальную историю с кнопками редактирования/удаления
+    showHistory(exerciseId) {
+        const ex = Storage.getExercises().find(e => e.id === exerciseId);
+        if (!ex) return;
+        
+        let message = `📊 ${ex.name}\n`;
+        message += `🏆 Лучший 1ПМ: ${ex.pr || 0} кг\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        if (ex.sets.length === 0) {
+            message += `Нет записей о тренировках\n\n`;
+            message += `Нажмите "Добавить подход", чтобы начать`;
+            alert(message);
+            return;
+        }
+        
+        message += `📝 СПИСОК ПОДХОДОВ:\n\n`;
+        
+        ex.sets.slice().reverse().forEach((set, idx) => {
+            const oneRM = this.calculateOneRM(set.weight, set.reps);
+            const originalIndex = ex.sets.length - idx;
+            message += `${originalIndex}. ${set.date}\n`;
+            message += `   ${set.weight}кг × ${set.reps} раз\n`;
+            message += `   1ПМ: ${oneRM}кг\n`;
+            message += `   🆔 ID: ${set.id.substring(0, 8)}...\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+        });
+        
+        message += `\n✏️ Чтобы редактировать или удалить подход,\n`;
+        message += `   нажмите "Редактировать" и введите ID подхода`;
+        
+        // Показываем через confirm с возможностью редактирования
+        const action = confirm(`${message}\n\n─────────────────────\nХотите РЕДАКТИРОВАТЬ или УДАЛИТЬ подход?\n\n"OK" - Редактировать\n"Отмена" - Удалить`);
+        
+        if (action) {
+            // Редактирование
+            const setId = prompt('Введите ID подхода (первые 8 символов из списка выше):');
+            if (setId) {
+                const foundSet = ex.sets.find(s => s.id.startsWith(setId));
+                if (foundSet) {
+                    this.editSet(exerciseId, foundSet.id);
+                } else {
+                    alert('❌ Подход с таким ID не найден!');
+                }
+            }
+        } else {
+            // Удаление
+            const setId = prompt('Введите ID подхода для УДАЛЕНИЯ (первые 8 символов):');
+            if (setId) {
+                const foundSet = ex.sets.find(s => s.id.startsWith(setId));
+                if (foundSet && confirm(`Удалить подход: ${foundSet.weight}кг × ${foundSet.reps} (${foundSet.date})?`)) {
+                    ex.sets = ex.sets.filter(s => s.id !== foundSet.id);
+                    // Пересчитываем PR
+                    if (ex.sets.length > 0) {
+                        ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
+                    } else {
+                        ex.pr = 0;
+                    }
+                    Storage.setExercises(Storage.getExercises());
+                    window.dispatchEvent(new Event('dataUpdated'));
+                    alert('✅ Подход удалён!');
+                } else if (!foundSet) {
+                    alert('❌ Подход с таким ID не найден!');
+                }
+            }
+        }
+    },
+    
+    // НОВЫЙ МЕТОД: Редактирование подхода
+    editSet(exerciseId, setId) {
         const exercises = Storage.getExercises();
         const ex = exercises.find(e => e.id === exerciseId);
         if (!ex) return;
-
-        const pr = ex.pr || this.calculatePR(ex);
-        const progress = this.calculateProgress(ex);
         
-        let message = `📊 ИСТОРИЯ: ${ex.name}\n\n`;
-        message += `🏆 Лучший 1ПМ: ${pr} кг\n`;
-        message += `📈 Общий прогресс: ${progress}%\n`;
-        message += `📝 Всего подходов: ${ex.sets.length}\n\n`;
-        message += `📋 ПОСЛЕДНИЕ ПОДХОДЫ:\n`;
-        message += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-
-        ex.sets.slice(-10).reverse().forEach(set => {
-            const oneRM = this.calculateOneRM(set.weight, set.reps);
-            message += `📅 ${set.date}\n`;
-            message += `   ${set.weight}кг × ${set.reps} раз\n`;
-            message += `   → 1ПМ: ${oneRM}кг\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━━━\n`;
-        });
-
-        if (ex.sets.length === 0) message += "Нет записей о тренировках";
-
-        alert(message);
+        const set = ex.sets.find(s => s.id === setId);
+        if (!set) {
+            alert('❌ Подход не найден!');
+            return;
+        }
+        
+        const newWeight = prompt(`Редактировать вес (было: ${set.weight} кг):`, set.weight);
+        const newReps = prompt(`Редактировать повторения (было: ${set.reps}):`, set.reps);
+        
+        if (newWeight && !isNaN(parseFloat(newWeight))) set.weight = parseFloat(newWeight);
+        if (newReps && !isNaN(parseInt(newReps))) set.reps = parseInt(newReps);
+        
+        // Пересчитываем PR
+        if (ex.sets.length > 0) {
+            ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
+        } else {
+            ex.pr = 0;
+        }
+        
+        Storage.setExercises(exercises);
+        window.dispatchEvent(new Event('dataUpdated'));
+        alert('✅ Подход обновлён!');
     },
-
+    
     updateUI() {
-        this.updateShortList();
-        this.updateFullList();
-    },
-
-    updateShortList() {
+        const exercises = Storage.getExercises();
         const container = document.getElementById('exercisesList');
-        if (!container) return;
-
-        const exercises = Storage.getExercises();
-        container.innerHTML = '';
-
-        exercises.slice(0, 3).forEach(ex => {
-            const lastSet = ex.sets[ex.sets.length - 1];
-            const lastSetText = lastSet ? `${lastSet.weight}кг × ${lastSet.reps} (${lastSet.date})` : 'Нет записей';
-            const pr = ex.pr || this.calculatePR(ex);
-            const progress = this.calculateProgress(ex);
-
-            const div = document.createElement('div');
-            div.className = 'exercise-item';
-            div.innerHTML = `
-                <div class="exercise-name">${this.escapeHtml(ex.name)}</div>
-                <div class="exercise-stats">${lastSetText}</div>
-                <div class="exercise-stats exercise-pr">🏆 PR: ${pr} кг</div>
-                <div class="exercise-progress">
-                    <div class="exercise-progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <div class="exercise-stats" style="margin-top: 6px;">📈 Прогресс: ${progress}%</div>
-            `;
-            div.onclick = () => this.showExerciseHistory(ex.id);
-            container.appendChild(div);
-        });
+        if (container) {
+            container.innerHTML = '';
+            exercises.slice(0,3).forEach(ex => {
+                const last = ex.sets[ex.sets.length-1];
+                const progress = this.calcProgress(ex);
+                container.innerHTML += `
+                    <div class="exercise-item" onclick="window.Exercises.showHistory('${ex.id}')">
+                        <div class="exercise-name">${this.escapeHtml(ex.name)}</div>
+                        <div class="exercise-stats">${last ? last.weight+'кг × '+last.reps + ' (' + last.date + ')' : 'Нет записей'}</div>
+                        <div class="exercise-stats exercise-pr">🏆 PR: ${ex.pr || 0} кг</div>
+                        <div class="exercise-progress"><div class="exercise-progress-bar" style="width: ${progress}%"></div></div>
+                        <div class="exercise-stats" style="margin-top:6px;">📈 Прогресс: ${progress}%</div>
+                    </div>
+                `;
+            });
+        }
+        
+        const full = document.getElementById('fullExercisesList');
+        if (full) {
+            full.innerHTML = '';
+            exercises.forEach(ex => {
+                const progress = this.calcProgress(ex);
+                full.innerHTML += `
+                    <div class="exercise-item">
+                        <div class="exercise-name">${this.escapeHtml(ex.name)}</div>
+                        <div class="exercise-stats">📊 Всего подходов: ${ex.sets.length}</div>
+                        <div class="exercise-stats">🏆 Лучший 1ПМ: ${ex.pr || 0} кг</div>
+                        <div class="exercise-progress"><div class="exercise-progress-bar" style="width: ${progress}%"></div></div>
+                        <button class="btn-secondary" style="margin-top:12px;" onclick="window.Exercises.showAddSet('${ex.id}','${this.escapeHtml(ex.name)}')">
+                            ➕ Добавить подход
+                        </button>
+                        <button class="btn-secondary" style="margin-top:8px;" onclick="window.Exercises.showCalculator('${ex.id}')">
+                            📐 Калькулятор 1RM
+                        </button>
+                        <button class="btn-secondary" style="margin-top:8px;" onclick="window.Exercises.showHistory('${ex.id}')">
+                            📊 История / Редактировать
+                        </button>
+                    </div>
+                `;
+            });
+        }
     },
-
-    updateFullList() {
-        const container = document.getElementById('fullExercisesList');
-        if (!container) return;
-
-        const exercises = Storage.getExercises();
-        container.innerHTML = '';
-
-        exercises.forEach(ex => {
-            const pr = ex.pr || this.calculatePR(ex);
-            const progress = this.calculateProgress(ex);
-
-            const div = document.createElement('div');
-            div.className = 'exercise-item';
-            div.innerHTML = `
-                <div class="exercise-name">${this.escapeHtml(ex.name)}</div>
-                <div class="exercise-stats">📊 Всего подходов: ${ex.sets.length}</div>
-                <div class="exercise-stats">🏆 Лучший 1ПМ: ${pr} кг</div>
-                <div class="exercise-progress">
-                    <div class="exercise-progress-bar" style="width: ${progress}%"></div>
-                </div>
-                <button class="btn-secondary" style="margin-top: 12px;" onclick="window.Exercises.showAddSet('${ex.id}', '${this.escapeHtml(ex.name)}')">
-                    ➕ Добавить подход
-                </button>
-                <button class="btn-secondary" style="margin-top: 8px;" onclick="window.Exercises.showCalculator('${ex.id}')">
-                    📐 Калькулятор 1RM
-                </button>
-                <button class="btn-secondary" style="margin-top: 8px;" onclick="window.Exercises.showExerciseHistory('${ex.id}')">
-                    📊 История
-                </button>
-            `;
-            container.appendChild(div);
-        });
+    
+    calcProgress(ex) {
+        if (ex.sets.length < 2) return 0;
+        const first = Math.max(...ex.sets.slice(0,2).map(s => this.calculateOneRM(s.weight, s.reps)));
+        const last = Math.max(...ex.sets.slice(-2).map(s => this.calculateOneRM(s.weight, s.reps)));
+        const progress = ((last - first) / first) * 100;
+        return Math.max(0, Math.min(100, Math.round(progress)));
     },
-
+    
     escapeHtml(str) {
         if (!str) return '';
         return str.replace(/[&<>]/g, function(m) {
