@@ -14,27 +14,22 @@
         <div id="registerScreen" class="screen">
             <div class="register-card">
                 <h2>🏋️ GYM TRACKER</h2>
-                
                 <div class="input-group">
                     <label>ИМЯ</label>
                     <input type="text" id="regName" placeholder="Ваше имя">
                 </div>
-                
                 <div class="input-group">
                     <label>РОСТ (см)</label>
                     <input type="number" id="regHeight" placeholder="174">
                 </div>
-                
                 <div class="input-group">
                     <label>ВЕС (кг)</label>
                     <input type="number" step="0.1" id="regWeight" placeholder="77.8">
                 </div>
-                
                 <div class="input-group">
                     <label>ДАТА РОЖДЕНИЯ</label>
                     <input type="date" id="regBirthdate">
                 </div>
-                
                 <div class="input-group">
                     <label>ПОЛ</label>
                     <div class="radio-group">
@@ -42,35 +37,31 @@
                         <label><input type="radio" name="gender" value="female"> Женский</label>
                     </div>
                 </div>
-                
                 <div class="input-group">
                     <label>ДНЕЙ ПОСЕЩЕНИЙ</label>
                     <input type="number" id="regDays" placeholder="0">
                 </div>
-                
                 <button id="saveProfileBtn" class="btn-primary">СОХРАНИТЬ И НАЧАТЬ</button>
             </div>
         </div>
 
         <!-- ГЛАВНЫЙ ЭКРАН -->
         <div id="mainApp" class="screen hidden">
-            <!-- Шапка -->
             <div class="header">
                 <h1 class="logo">🏋️ GYM TRACKER</h1>
                 <div id="checkStatus" class="check-status"></div>
             </div>
 
-            <!-- Профиль -->
             <div class="profile-card">
                 <div id="userName" class="profile-name"></div>
                 <div id="userStats" class="profile-stats"></div>
                 <div class="metrics-grid">
-                    <div class="metric" id="bmiMetric">
+                    <div class="metric">
                         <div class="metric-label">ИМТ</div>
                         <div id="bmiValue" class="metric-value"></div>
                         <div id="bmiStatus" class="metric-status"></div>
                     </div>
-                    <div class="metric" id="weightMetric" onclick="window.User.showWeightModal?.()">
+                    <div class="metric" onclick="window.User?.showWeightModal()">
                         <div class="metric-label">ВЕС</div>
                         <div id="weightValue" class="metric-value"></div>
                         <div class="metric-unit">кг</div>
@@ -83,19 +74,19 @@
                 </div>
             </div>
 
-            <!-- Кнопка отметки -->
+            <!-- Карточка цели -->
+            <div id="goalCard"></div>
+
             <button id="checkInBtn" class="btn-primary">✅ ОТМЕТИТЬСЯ СЕГОДНЯ</button>
 
-            <!-- Навигация -->
             <div class="nav-tabs">
-                <button class="nav-tab active" data-tab="main">🏠 Главная</button>
-                <button class="nav-tab" data-tab="calendar">📅 Календарь</button>
-                <button class="nav-tab" data-tab="exercises">💪 Упражнения</button>
-                <button class="nav-tab" data-tab="history">📊 История</button>
+                <button class="nav-tab active" data-page="main">🏠 Главная</button>
+                <button class="nav-tab" data-page="calendar">📅 Календарь</button>
+                <button class="nav-tab" data-page="exercises">💪 Упражнения</button>
+                <button class="nav-tab" data-page="history">📊 История</button>
             </div>
 
-            <!-- Вкладка: Главная -->
-            <div id="tabMain" class="tab-content">
+            <div id="pageMain" class="page">
                 <div class="exercises-section">
                     <h3>🏋️ УПРАЖНЕНИЯ</h3>
                     <div id="exercisesList"></div>
@@ -103,8 +94,7 @@
                 </div>
             </div>
 
-            <!-- Вкладка: Календарь -->
-            <div id="tabCalendar" class="tab-content hidden">
+            <div id="pageCalendar" class="page hidden">
                 <div id="calendarGrid" class="calendar-grid"></div>
                 <div class="weight-chart">
                     <canvas id="weightChart"></canvas>
@@ -112,8 +102,7 @@
                 </div>
             </div>
 
-            <!-- Вкладка: Упражнения (полный список) -->
-            <div id="tabExercises" class="tab-content hidden">
+            <div id="pageExercises" class="page hidden">
                 <div class="exercises-section">
                     <h3>💪 ВСЕ УПРАЖНЕНИЯ</h3>
                     <div id="fullExercisesList"></div>
@@ -121,15 +110,14 @@
                 </div>
             </div>
 
-            <!-- Вкладка: История -->
-            <div id="tabHistory" class="tab-content hidden">
+            <div id="pageHistory" class="page hidden">
                 <div id="historyList" class="history-list"></div>
             </div>
         </div>
     </div>
 
     <!-- МОДАЛЬНЫЕ ОКНА -->
-    
+
     <!-- Добавление подхода -->
     <div id="addSetModal" class="modal">
         <div class="modal-content">
@@ -199,12 +187,38 @@
         </div>
     </div>
 
-    <!-- ПОДКЛЮЧАЕМ МОДУЛИ -->
+    <!-- Установка цели -->
+    <div id="goalModal" class="modal">
+        <div class="modal-content">
+            <h3>🎯 Установить цель</h3>
+            <div class="input-group">
+                <label>Тип цели</label>
+                <select id="goalType">
+                    <option value="lose">⬇️ Сбросить вес</option>
+                    <option value="gain">⬆️ Набрать вес</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Целевой вес (кг)</label>
+                <input type="number" step="0.1" id="goalTargetWeight" placeholder="Например: 70">
+            </div>
+            <div class="input-group">
+                <label>Дата достижения</label>
+                <input type="date" id="goalTargetDate">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="window.closeModal('goalModal')">ОТМЕНА</button>
+                <button class="btn-save" onclick="window.Goals.saveGoal()">СОХРАНИТЬ</button>
+            </div>
+        </div>
+    </div>
+
     <script src="modules/storage.js"></script>
     <script src="modules/user.js"></script>
     <script src="modules/exercises.js"></script>
     <script src="modules/calendar.js"></script>
     <script src="modules/history.js"></script>
+    <script src="modules/goals.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
