@@ -2,6 +2,9 @@ window.Exercises = {
     currentExerciseId: null,
     currentCalculatorId: null,
     
+    // Список ID базовых упражнений (их нельзя удалить)
+    baseExerciseIds: ['1', '2', '3'],
+    
     init() {
         console.log('Exercises.init() вызван');
         
@@ -19,20 +22,48 @@ window.Exercises = {
     
     create() {
         const name = document.getElementById('newExerciseName').value.trim();
-        if (!name) { alert('Введите название'); return; }
+        if (!name) { 
+            alert('Введите название'); 
+            return; 
+        }
         
         const exercises = Storage.getExercises();
+        
+        // Проверка на дубликат
+        if (exercises.some(e => e.name.toLowerCase() === name.toLowerCase())) {
+            alert('❌ Упражнение с таким названием уже существует!');
+            return;
+        }
+        
         exercises.push({ 
             id: Date.now().toString(), 
             name: name, 
             sets: [], 
-            pr: 0 
+            pr: 0,
+            isCustom: true  // Отмечаем как пользовательское
         });
         Storage.setExercises(exercises);
         
         document.getElementById('addExerciseModal').classList.remove('active');
         window.dispatchEvent(new Event('dataUpdated'));
         alert(`✅ Упражнение "${name}" добавлено!`);
+    },
+    
+    // НОВЫЙ МЕТОД: Удаление упражнения
+    deleteExercise(exerciseId, exerciseName) {
+        // Проверка: нельзя удалять базовые упражнения
+        if (this.baseExerciseIds.includes(exerciseId)) {
+            alert('❌ Базовые упражнения (Жим лежа, Присед, Становая тяга) нельзя удалить!');
+            return;
+        }
+        
+        if (confirm(`Удалить упражнение "${exerciseName}"?\n\nВсе данные о подходах будут потеряны!`)) {
+            const exercises = Storage.getExercises();
+            const newExercises = exercises.filter(e => e.id !== exerciseId);
+            Storage.setExercises(newExercises);
+            window.dispatchEvent(new Event('dataUpdated'));
+            alert(`✅ Упражнение "${exerciseName}" удалено!`);
+        }
     },
     
     showAddSet(id, name) {
@@ -126,7 +157,6 @@ window.Exercises = {
         window.dispatchEvent(new Event('dataUpdated'));
     },
     
-    // Показать историю подходов с возможностью редактирования/удаления
     showHistory(exerciseId) {
         const ex = Storage.getExercises().find(e => e.id === exerciseId);
         if (!ex) return;
@@ -141,7 +171,6 @@ window.Exercises = {
         message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
         message += `📝 СПИСОК ПОДХОДОВ:\n\n`;
         
-        // Показываем последние 10 подходов (сначала новые)
         const recentSets = [...ex.sets].reverse().slice(0, 10);
         
         recentSets.forEach((set, idx) => {
@@ -160,7 +189,6 @@ window.Exercises = {
         const action = confirm(message);
         
         if (action) {
-            // Редактирование
             const setId = prompt('Введите ID подхода (первые 8 символов из списка):');
             if (setId) {
                 const foundSet = ex.sets.find(s => s.id.startsWith(setId));
@@ -171,7 +199,6 @@ window.Exercises = {
                 }
             }
         } else {
-            // Удаление
             const setId = prompt('Введите ID подхода для УДАЛЕНИЯ (первые 8 символов):');
             if (setId) {
                 const foundSet = ex.sets.find(s => s.id.startsWith(setId));
@@ -180,7 +207,6 @@ window.Exercises = {
                         const index = ex.sets.findIndex(s => s.id === foundSet.id);
                         if (index !== -1) ex.sets.splice(index, 1);
                         
-                        // Пересчитываем PR
                         if (ex.sets.length > 0) {
                             ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
                         } else {
@@ -215,7 +241,6 @@ window.Exercises = {
         if (newWeight && !isNaN(parseFloat(newWeight))) set.weight = parseFloat(newWeight);
         if (newReps && !isNaN(parseInt(newReps))) set.reps = parseInt(newReps);
         
-        // Пересчитываем PR
         if (ex.sets.length > 0) {
             ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
         } else {
@@ -263,7 +288,7 @@ window.Exercises = {
             }
         }
         
-        // Полный список на странице "Упражнения"
+        // Полный список на странице "Упражнения" с кнопкой удаления
         const full = document.getElementById('fullExercisesList');
         if (full) {
             full.innerHTML = '';
@@ -273,21 +298,34 @@ window.Exercises = {
             } else {
                 exercises.forEach(ex => {
                     const progress = this.calcProgress(ex);
+                    const isBase = this.baseExerciseIds.includes(ex.id);
+                    
                     full.innerHTML += `
                         <div class="exercise-item">
-                            <div class="exercise-name">${this.escapeHtml(ex.name)}</div>
+                            <div class="exercise-name">
+                                ${this.escapeHtml(ex.name)}
+                                ${isBase ? '<span style="font-size:10px; color:#888; margin-left:8px;">📌 базовое</span>' : ''}
+                            </div>
                             <div class="exercise-stats">📊 Всего подходов: ${ex.sets.length}</div>
                             <div class="exercise-stats">🏆 Лучший 1ПМ: ${ex.pr || 0} кг</div>
                             <div class="exercise-progress"><div class="exercise-progress-bar" style="width: ${progress}%"></div></div>
-                            <button class="btn-secondary" style="margin-top:12px;" onclick="event.stopPropagation(); window.Exercises.showAddSet('${ex.id}','${this.escapeHtml(ex.name)}')">
-                                ➕ Добавить подход
+                            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showAddSet('${ex.id}','${this.escapeHtml(ex.name)}')">
+                                    ➕ Добавить подход
+                                </button>
+                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showCalculator('${ex.id}')">
+                                    📐 Калькулятор 1RM
+                                </button>
+                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showHistory('${ex.id}')">
+                                    📊 История
+                                </button>
+                            </div>
+                            ${!isBase ? `
+                            <button class="btn-delete-exercise" style="margin-top: 8px; width:100%; background: rgba(255,68,68,0.15); color:#FF4444; border: 1px solid #FF4444; padding: 10px; border-radius: 12px; cursor: pointer;" 
+                                onclick="event.stopPropagation(); window.Exercises.deleteExercise('${ex.id}','${this.escapeHtml(ex.name)}')">
+                                🗑️ Удалить упражнение
                             </button>
-                            <button class="btn-secondary" style="margin-top:8px;" onclick="event.stopPropagation(); window.Exercises.showCalculator('${ex.id}')">
-                                📐 Калькулятор 1RM
-                            </button>
-                            <button class="btn-secondary" style="margin-top:8px;" onclick="event.stopPropagation(); window.Exercises.showHistory('${ex.id}')">
-                                📊 История
-                            </button>
+                            ` : ''}
                         </div>
                     `;
                 });
