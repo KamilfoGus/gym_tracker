@@ -646,3 +646,108 @@ canvas {
     background: rgba(255, 68, 68, 0.3);
     transform: scale(0.98);
 }
+/* ============ ИСТОРИЯ ПОДХОДОВ (КРАСИВОЕ ОКНО) ============ */
+.history-set-item {
+    background: #2A2A2A;
+    border-radius: 16px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-left: 3px solid #FF4444;
+}
+
+.history-set-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: #888888;
+}
+
+.history-set-date {
+    font-weight: bold;
+}
+
+.history-set-id {
+    font-family: monospace;
+}
+
+.history-set-data {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.history-set-weight {
+    font-size: 20px;
+    font-weight: bold;
+    color: #FF4444;
+}
+
+.history-set-reps {
+    font-size: 16px;
+    color: #FFFFFF;
+}
+
+.history-set-1rm {
+    font-size: 13px;
+    color: #FF4444;
+    background: rgba(255,68,68,0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.history-set-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.btn-edit-set, .btn-delete-set {
+    flex: 1;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.btn-edit-set {
+    background: #2A2A2A;
+    color: #FF4444;
+    border: 1px solid #FF4444;
+}
+
+.btn-delete-set {
+    background: rgba(255,68,68,0.15);
+    color: #FF4444;
+    border: 1px solid #FF4444;
+}
+
+.btn-edit-set:active, .btn-delete-set:active {
+    transform: scale(0.97);
+}
+
+/* Стиль для кнопки удаления упражнения */
+.btn-delete-exercise {
+    background: rgba(255, 68, 68, 0.1);
+    color: #FF4444;
+    border: 1px solid #FF4444;
+    padding: 10px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.btn-delete-exercise:active {
+    background: rgba(255, 68, 68, 0.3);
+    transform: scale(0.98);
+}
