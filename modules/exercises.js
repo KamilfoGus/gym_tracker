@@ -85,13 +85,9 @@ window.Exercises = {
         const ex = exercises.find(e => e.id === this.currentExerciseId);
         
         if (ex) {
-            // Рассчитываем 1ПМ нового подхода
             const newOneRM = this.calculateOneRM(weight, reps);
-            
-            // Находим лучший предыдущий 1ПМ
             const oldBestPR = ex.pr || 0;
             
-            // Добавляем новый подход
             const newSet = { 
                 id: Date.now().toString(),
                 date: new Date().toISOString().split('T')[0], 
@@ -100,17 +96,14 @@ window.Exercises = {
             };
             ex.sets.push(newSet);
             
-            // Обновляем PR
             if (!ex.pr || newOneRM > ex.pr) {
                 ex.pr = newOneRM;
             }
             
             Storage.setExercises(exercises);
             
-            // ПОКАЗЫВАЕМ ПРОГРЕСС В ПРОЦЕНТАХ
             const progressPercent = this.calculateProgressPercentage(oldBestPR, ex.pr);
             
-            // Красивое сообщение с прогрессом
             let progressMessage = '';
             if (oldBestPR === 0) {
                 progressMessage = `🎉 Первый результат! 1ПМ: ${newOneRM} кг\nПродолжай в том же духе! 💪`;
@@ -118,7 +111,7 @@ window.Exercises = {
                 progressMessage = `📈 Поздравляю! Ты стал сильнее на ${progressPercent}%!\nБыло: ${oldBestPR} кг → Стало: ${ex.pr} кг 🔥`;
             } else {
                 const difference = ((oldBestPR - newOneRM) / oldBestPR * 100).toFixed(1);
-                progressMessage = `📊 Результат добавлен: ${newOneRM} кг\nДо рекорда (${oldBestPR} кг) не хватает ${difference}% 💪\nПродолжай тренироваться!`;
+                progressMessage = `📊 Результат добавлен: ${newOneRM} кг\nДо рекорда (${oldBestPR} кг) не хватает ${difference}%\nПродолжай тренироваться! 💪`;
             }
             
             alert(progressMessage);
@@ -129,7 +122,7 @@ window.Exercises = {
     },
     
     calculateOneRM(w, r) { 
-        return Math.round(w * (1 + r/30)); 
+        return Math.round(w * (1 + r / 30)); 
     },
     
     calculateProgressPercentage(oldValue, newValue) {
@@ -224,7 +217,6 @@ window.Exercises = {
         
         container.innerHTML = '';
         
-        // Показываем подходы от новых к старым
         const sortedSets = [...ex.sets].reverse();
         
         sortedSets.forEach((set, idx) => {
@@ -303,7 +295,6 @@ window.Exercises = {
         
         const newOneRM = this.calculateOneRM(newWeight, newReps);
         
-        // Пересчитываем PR
         ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
         
         Storage.setExercises(exercises);
@@ -312,7 +303,6 @@ window.Exercises = {
         document.getElementById('editSetModal').classList.remove('active');
         this.currentEditingSet = null;
         
-        // Показываем изменение в процентах
         const percentChange = ((newOneRM - oldOneRM) / oldOneRM * 100).toFixed(1);
         if (newOneRM > oldOneRM) {
             alert(`✅ Подход обновлён!\n📈 1ПМ увеличился на ${percentChange}% (${oldOneRM} → ${newOneRM} кг)`);
@@ -338,7 +328,6 @@ window.Exercises = {
         if (confirm(`Удалить подход: ${setToDelete.weight}кг × ${setToDelete.reps} раз (1ПМ: ${oneRMToDelete} кг)?`)) {
             ex.sets = ex.sets.filter(s => s.id !== setId);
             
-            // Пересчитываем PR
             if (ex.sets.length > 0) {
                 ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
             } else {
@@ -369,7 +358,6 @@ window.Exercises = {
     updateUI() {
         const exercises = Storage.getExercises();
         
-        // Краткий список на главной
         const container = document.getElementById('exercisesList');
         if (container) {
             container.innerHTML = '';
@@ -392,7 +380,6 @@ window.Exercises = {
             }
         }
         
-        // Полный список на странице упражнений
         const full = document.getElementById('fullExercisesList');
         if (full) {
             full.innerHTML = '';
