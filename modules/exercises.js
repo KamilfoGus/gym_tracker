@@ -85,13 +85,9 @@ window.Exercises = {
         const ex = exercises.find(e => e.id === this.currentExerciseId);
         
         if (ex) {
-            // Рассчитываем 1ПМ нового подхода
             const newOneRM = this.calculateOneRM(weight, reps);
-            
-            // Находим лучший предыдущий 1ПМ
             const oldBestPR = ex.pr || 0;
             
-            // Добавляем новый подход
             const newSet = { 
                 id: Date.now().toString(),
                 date: new Date().toISOString().split('T')[0], 
@@ -100,27 +96,22 @@ window.Exercises = {
             };
             ex.sets.push(newSet);
             
-            // Обновляем PR
             if (!ex.pr || newOneRM > ex.pr) {
                 ex.pr = newOneRM;
             }
             
             Storage.setExercises(exercises);
             
-            // ПОКАЗЫВАЕМ ПРОГРЕСС В ПРОЦЕНТАХ
             const progressPercent = this.calculateProgressPercentage(oldBestPR, ex.pr);
             
-            // Красивое сообщение с прогрессом
             let progressMessage = '';
             if (oldBestPR === 0) {
                 progressMessage = `🎉 Первый результат! 1ПМ: ${newOneRM} кг\nПродолжай в том же духе! 💪`;
             } else if (newOneRM > oldBestPR) {
-                progressMessage = `📈 Поздравляю! Ты стал сильнее на ${progressPercent}%!\n`;
-                progressMessage += `Было: ${oldBestPR} кг → Стало: ${ex.pr} кг 🔥`;
+                progressMessage = `📈 Поздравляю! Ты стал сильнее на ${progressPercent}%!\nБыло: ${oldBestPR} кг → Стало: ${ex.pr} кг 🔥`;
             } else {
                 const difference = ((oldBestPR - newOneRM) / oldBestPR * 100).toFixed(1);
-                progressMessage = `📊 Результат добавлен: ${newOneRM} кг\n`;
-                progressMessage += `До рекорда (${oldBestPR} кг) не хватает ${difference}% 💪\nПродолжай тренироваться!`;
+                progressMessage = `📊 Результат добавлен: ${newOneRM} кг\nДо рекорда (${oldBestPR} кг) не хватает ${difference}% 💪`;
             }
             
             alert(progressMessage);
@@ -132,7 +123,6 @@ window.Exercises = {
     
     calculateOneRM(w, r) { return Math.round(w * (1 + r/30)); },
     
-    // НОВЫЙ МЕТОД: расчёт процента прогресса
     calculateProgressPercentage(oldValue, newValue) {
         if (oldValue === 0) return 100;
         const difference = newValue - oldValue;
@@ -191,7 +181,6 @@ window.Exercises = {
             
             Storage.setExercises(exercises);
             
-            // ПОКАЗЫВАЕМ ПРОГРЕСС
             const progressPercent = this.calculateProgressPercentage(oldBestPR, ex.pr);
             
             let message = `✅ Сохранено: ${w}кг × ${r} = 1ПМ ${newOneRM}кг\n`;
@@ -256,8 +245,8 @@ window.Exercises = {
         });
         
         document.getElementById('historyExerciseName').textContent = ex.name;
-        document.getElementById('historyExercisePr').textContent = `${ex.pr || 0} кг`;
-        document.getElementById('historyTotalSets').textContent = `${ex.sets.length} ${this.getDeclension(ex.sets.length, ['подход', 'подхода', 'подходов'])}`;
+        document.getElementById('historyExercisePr').textContent = `${ex.pr || 0}`;
+        document.getElementById('historyTotalSets').textContent = `${ex.sets.length}`;
         
         document.getElementById('historyModal').classList.add('active');
     },
@@ -302,7 +291,6 @@ window.Exercises = {
         
         const newOneRM = this.calculateOneRM(newWeight, newReps);
         
-        // Пересчитываем PR
         ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
         
         Storage.setExercises(exercises);
@@ -311,7 +299,6 @@ window.Exercises = {
         document.getElementById('editSetModal').classList.remove('active');
         this.currentEditingSet = null;
         
-        // Показываем изменение
         const percentChange = ((newOneRM - oldOneRM) / oldOneRM * 100).toFixed(1);
         if (newOneRM > oldOneRM) {
             alert(`✅ Подход обновлён!\n📈 1ПМ увеличился на ${percentChange}% (${oldOneRM} → ${newOneRM} кг)`);
@@ -354,11 +341,6 @@ window.Exercises = {
                 alert('✅ Подход удалён!');
             }
         }
-    },
-    
-    getDeclension(number, words) {
-        const cases = [2, 0, 1, 1, 1, 2];
-        return words[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
     },
     
     calcProgress(ex) {
