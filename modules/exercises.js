@@ -1,7 +1,6 @@
 window.Exercises = {
     currentExerciseId: null,
     currentCalculatorId: null,
-    currentSetForEdit: null,
     currentExerciseForEdit: null,
     
     baseExerciseIds: ['1', '2', '3'],
@@ -66,7 +65,7 @@ window.Exercises = {
     
     showAddSet(id, name) {
         this.currentExerciseId = id;
-        document.getElementById('modalExerciseName').textContent = `Добавить: ${name}`;
+        document.getElementById('modalExerciseName').textContent = `➕ Добавить: ${name}`;
         document.getElementById('setWeight').value = '';
         document.getElementById('setReps').value = '';
         document.getElementById('addSetModal').classList.add('active');
@@ -155,7 +154,7 @@ window.Exercises = {
         window.dispatchEvent(new Event('dataUpdated'));
     },
     
-    // НОВЫЙ МЕТОД: Показать красивое окно с историей
+    // ПОКАЗАТЬ ИСТОРИЮ С КНОПКАМИ (БЕЗ ВВОДА ID!)
     showHistory(exerciseId) {
         const ex = Storage.getExercises().find(e => e.id === exerciseId);
         if (!ex) return;
@@ -167,46 +166,52 @@ window.Exercises = {
             return;
         }
         
-        // Заполняем модальное окно
+        // Заполняем контейнер списком подходов
         const container = document.getElementById('historySetsList');
         if (!container) return;
         
         container.innerHTML = '';
         
-        // Показываем последние 20 подходов (сначала новые)
-        const recentSets = [...ex.sets].reverse();
+        // Показываем подходы (сначала новые)
+        const sortedSets = [...ex.sets].reverse();
         
-        recentSets.forEach((set, idx) => {
+        sortedSets.forEach((set, idx) => {
             const oneRM = this.calculateOneRM(set.weight, set.reps);
-            const date = new Date(set.date).toLocaleDateString('ru-RU');
+            const date = new Date(set.date).toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
             
-            const setDiv = document.createElement('div');
-            setDiv.className = 'history-set-item';
-            setDiv.innerHTML = `
-                <div class="history-set-header">
-                    <span class="history-set-date">📅 ${date}</span>
-                    <span class="history-set-id">🆔 ${set.id.substring(0, 8)}</span>
-                </div>
-                <div class="history-set-data">
-                    <span class="history-set-weight">${set.weight} кг</span>
-                    <span class="history-set-reps">× ${set.reps} раз</span>
+            const setCard = document.createElement('div');
+            setCard.className = 'history-set-card';
+            setCard.innerHTML = `
+                <div class="history-set-number">#${ex.sets.length - idx}</div>
+                <div class="history-set-date">📅 ${date}</div>
+                <div class="history-set-details">
+                    <span class="history-set-weight">${set.weight} <span class="history-set-unit">кг</span></span>
+                    <span class="history-set-multiply">×</span>
+                    <span class="history-set-reps">${set.reps} <span class="history-set-unit">раз</span></span>
                     <span class="history-set-1rm">🏆 1ПМ: ${oneRM} кг</span>
                 </div>
                 <div class="history-set-actions">
-                    <button class="btn-edit-set" onclick="window.Exercises.openEditModal('${set.id}')">✏️ Редактировать</button>
-                    <button class="btn-delete-set" onclick="window.Exercises.deleteSet('${set.id}')">🗑️ Удалить</button>
+                    <button class="btn-edit" onclick="window.Exercises.openEditModal('${set.id}')">✏️ Редактировать</button>
+                    <button class="btn-delete" onclick="window.Exercises.deleteSet('${set.id}')">🗑️ Удалить</button>
                 </div>
             `;
-            container.appendChild(setDiv);
+            container.appendChild(setCard);
         });
         
+        // Обновляем заголовок
         document.getElementById('historyExerciseName').textContent = ex.name;
         document.getElementById('historyExercisePr').textContent = `${ex.pr || 0} кг`;
-        document.getElementById('historyTotalSets').textContent = `${ex.sets.length} подходов`;
+        document.getElementById('historyTotalSets').textContent = `${ex.sets.length} ${this.getDeclension(ex.sets.length, ['подход', 'подхода', 'подходов'])}`;
+        
+        // Открываем модалку
         document.getElementById('historyModal').classList.add('active');
     },
     
-    // Открыть модалку редактирования
+    // Открыть окно редактирования подхода
     openEditModal(setId) {
         const ex = this.currentExerciseForEdit;
         if (!ex) return;
@@ -214,19 +219,28 @@ window.Exercises = {
         const set = ex.sets.find(s => s.id === setId);
         if (!set) return;
         
-        this.currentSetForEdit = set;
+        // Сохраняем текущий подход для редактирования
+        this.currentEditingSet = { setId, exerciseId: ex.id };
         
+        // Заполняем форму
         document.getElementById('editSetWeight').value = set.weight;
         document.getElementById('editSetReps').value = set.reps;
-        document.getElementById('editSetId').textContent = set.id.substring(0, 8);
-        document.getElementById('editSetDate').textContent = new Date(set.date).toLocaleDateString('ru-RU');
         
+        // Закрываем историю и открываем окно редактирования
+        document.getElementById('historyModal').classList.remove('active');
         document.getElementById('editSetModal').classList.add('active');
     },
     
     // Сохранить редактирование
     saveEditSet() {
-        if (!this.currentSetForEdit || !this.currentExerciseForEdit) return;
+        if (!this.currentEditingSet) return;
+        
+        const exercises = Storage.getExercises();
+        const ex = exercises.find(e => e.id === this.currentEditingSet.exerciseId);
+        if (!ex) return;
+        
+        const set = ex.sets.find(s => s.id === this.currentEditingSet.setId);
+        if (!set) return;
         
         const newWeight = parseFloat(document.getElementById('editSetWeight').value);
         const newReps = parseInt(document.getElementById('editSetReps').value);
@@ -236,21 +250,19 @@ window.Exercises = {
             return;
         }
         
-        this.currentSetForEdit.weight = newWeight;
-        this.currentSetForEdit.reps = newReps;
+        set.weight = newWeight;
+        set.reps = newReps;
         
         // Пересчитываем PR
-        const ex = this.currentExerciseForEdit;
-        if (ex.sets.length > 0) {
-            ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
-        } else {
-            ex.pr = 0;
-        }
+        ex.pr = Math.max(...ex.sets.map(s => this.calculateOneRM(s.weight, s.reps)));
         
-        Storage.setExercises(Storage.getExercises());
+        Storage.setExercises(exercises);
         window.dispatchEvent(new Event('dataUpdated'));
         
         document.getElementById('editSetModal').classList.remove('active');
+        this.currentEditingSet = null;
+        
+        // Показываем обновлённую историю
         this.showHistory(ex.id);
         alert('✅ Подход обновлён!');
     },
@@ -259,8 +271,12 @@ window.Exercises = {
     deleteSet(setId) {
         if (!this.currentExerciseForEdit) return;
         
-        if (confirm('Удалить этот подход?')) {
-            const ex = this.currentExerciseForEdit;
+        const ex = this.currentExerciseForEdit;
+        const setToDelete = ex.sets.find(s => s.id === setId);
+        
+        if (!setToDelete) return;
+        
+        if (confirm(`Удалить подход: ${setToDelete.weight}кг × ${setToDelete.reps} раз?`)) {
             ex.sets = ex.sets.filter(s => s.id !== setId);
             
             // Пересчитываем PR
@@ -273,9 +289,20 @@ window.Exercises = {
             Storage.setExercises(Storage.getExercises());
             window.dispatchEvent(new Event('dataUpdated'));
             
-            this.showHistory(ex.id);
-            alert('✅ Подход удалён!');
+            if (ex.sets.length === 0) {
+                document.getElementById('historyModal').classList.remove('active');
+                alert('✅ Подход удалён! Больше нет подходов в этом упражнении.');
+            } else {
+                this.showHistory(ex.id);
+                alert('✅ Подход удалён!');
+            }
         }
+    },
+    
+    // Вспомогательная функция для склонения
+    getDeclension(number, words) {
+        const cases = [2, 0, 1, 1, 1, 2];
+        return words[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
     },
     
     calcProgress(ex) {
@@ -333,7 +360,7 @@ window.Exercises = {
                             <div class="exercise-progress"><div class="exercise-progress-bar" style="width: ${progress}%"></div></div>
                             <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
                                 <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showAddSet('${ex.id}','${this.escapeHtml(ex.name)}')">➕ Добавить подход</button>
-                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showCalculator('${ex.id}')">📐 1RM</button>
+                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showCalculator('${ex.id}')">📐 Калькулятор 1RM</button>
                                 <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showHistory('${ex.id}')">📊 История</button>
                             </div>
                             ${!isBase ? `<button class="btn-delete-exercise" onclick="event.stopPropagation(); window.Exercises.deleteExercise('${ex.id}','${this.escapeHtml(ex.name)}')">🗑️ Удалить упражнение</button>` : ''}
