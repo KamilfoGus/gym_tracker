@@ -302,11 +302,11 @@ body {
 
 /* ============ КАРТОЧКА ЦЕЛИ ============ */
 .goal-card {
-    background: linear-gradient(135deg, #1A2530 0%, #1A2028 100%);
+    background: #1A1A1A;
     border-radius: 20px;
     padding: 16px;
     margin-bottom: 20px;
-    border: 1px solid rgba(255,68,68,0.3);
+    border: 1px solid #2A2A2A;
 }
 
 .goal-header {
@@ -315,7 +315,7 @@ body {
     align-items: center;
     margin-bottom: 12px;
     font-size: 14px;
-    color: #FF8888;
+    color: #888888;
     font-weight: bold;
     flex-wrap: wrap;
     gap: 8px;
@@ -345,7 +345,7 @@ body {
 }
 
 .goal-progress-bar {
-    background: linear-gradient(90deg, #FF4444, #FF8888);
+    background: #FF4444;
     height: 100%;
     border-radius: 10px;
     transition: width 0.5s ease;
@@ -387,6 +387,31 @@ body {
     border-radius: 12px;
     cursor: pointer;
     font-size: 14px;
+}
+
+.goal-empty:active {
+    background: #3A3A3A;
+}
+
+.goal-completed {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.goal-expired {
+    background: rgba(255, 68, 68, 0.2);
+    color: #FF4444;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 12px;
+    font-size: 13px;
 }
 
 /* ============ НАВИГАЦИЯ ============ */
