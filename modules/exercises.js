@@ -355,7 +355,6 @@ window.Exercises = {
         return Math.max(0, Math.min(100, Math.round(progress)));
     },
 
-    // НОВЫЙ МЕТОД: показать график прогресса упражнения
     showProgressChart(exerciseId) {
         const ex = Storage.getExercises().find(e => e.id === exerciseId);
         if (!ex) return;
