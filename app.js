@@ -33,8 +33,6 @@ function setupTelegram() {
             document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', theme.secondary_bg_color || '#1A1A1A');
         }
         
-        // webApp.enableClosingConfirmation(); // ОТКЛЮЧЕНО
-        
         console.log('Telegram WebApp инициализирован, платформа:', webApp.platform);
     }
 }
@@ -54,6 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (window.Calendar) Calendar.updateUI();
                 if (window.History) History.updateUI();
                 if (window.Goals) Goals.renderGoalCard();
+                if (window.Achievements) {
+                    Achievements.checkAll();
+                    Achievements.renderWidget();
+                }
                 window.dispatchEvent(new Event('dataUpdated'));
             }
         });
@@ -83,6 +85,10 @@ document.addEventListener('DOMContentLoaded', () => {
         User.init();
         if (window.Exercises) Exercises.init();
         if (window.Goals) Goals.init();
+        if (window.Achievements) {
+            Achievements.checkAll();
+            Achievements.renderWidget();
+        }
         
         const pages = {
             main: 'pageMain',
@@ -106,32 +112,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (btn.dataset.page === 'calendar' && window.Calendar) {
                     window.Calendar.updateUI();
                 }
+                if (btn.dataset.page === 'main' && window.Achievements) {
+                    Achievements.renderWidget();
+                }
             };
         });
         
         window.addEventListener('dataUpdated', () => {
             console.log('dataUpdated событие - обновляем UI');
-            if (window.User) User.updateUI();
-            if (window.Exercises) Exercises.updateUI();
-            if (window.Calendar) Calendar.updateUI();
-            if (window.History) History.updateUI();
-            if (window.Goals) Goals.renderGoalCard();
-        });
-        
-        if (window.User) User.updateUI();
-        if (window.Exercises) Exercises.updateUI();
-        if (window.Calendar) Calendar.updateUI();
-        if (window.History) History.updateUI();
-        if (window.Goals) Goals.renderGoalCard();
-        
-        setupTelegram();
-    }
-});
-
-window.addEventListener('touchstart', function() {}, { passive: false });
-
-document.addEventListener('gesturestart', function(e) {
-    if (e.target.closest('.modal-content')) {
-        e.preventDefault();
-    }
-});
+            if (window.User) User.updateUI
