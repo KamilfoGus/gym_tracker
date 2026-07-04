@@ -878,3 +878,118 @@ body {
     font-weight: bold;
     color: #FFFFFF;
 }
+
+/* ============ ДОСТИЖЕНИЯ ============ */
+.achievements-widget {
+    background: #1A1A1A;
+    border-radius: 20px;
+    padding: 16px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    border: 1px solid #2A2A2A;
+    transition: all 0.2s;
+}
+
+.achievements-widget:active {
+    transform: scale(0.98);
+}
+
+.achievements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.achievements-count {
+    color: #FF4444;
+    font-size: 14px;
+}
+
+.achievements-progress {
+    background: #2A2A2A;
+    border-radius: 10px;
+    height: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.achievements-progress-bar {
+    background: linear-gradient(90deg, #FF4444, #FF8888);
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease;
+}
+
+.achievements-icons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.achievement-icon {
+    font-size: 24px;
+    transition: all 0.2s;
+}
+
+.achievement-empty {
+    color: #888888;
+    font-size: 13px;
+}
+
+/* ============ СПИСОК ДОСТИЖЕНИЙ В МОДАЛКЕ ============ */
+.achievements-section {
+    margin-bottom: 16px;
+}
+
+.achievements-section h4 {
+    color: #888888;
+    font-size: 13px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    background: #2A2A2A;
+}
+
+.achievement-item.earned {
+    border-left: 3px solid #4CAF50;
+}
+
+.achievement-item.locked {
+    border-left: 3px solid #3A3A3A;
+    opacity: 0.6;
+}
+
+.achievement-item .achievement-icon {
+    font-size: 28px;
+}
+
+.achievement-item .achievement-name {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.achievement-item .achievement-desc {
+    font-size: 12px;
+    color: #888888;
+}
+
+.achievement-item .achievement-badge {
+    margin-left: auto;
+    font-size: 16px;
+}
+
+/* ============ ГРАФИК ПРОГРЕССА ============ */
+#progressChartModal .modal-content {
+    max-width: 500px;
+}
