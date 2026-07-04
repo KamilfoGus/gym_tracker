@@ -12,7 +12,6 @@ window.Storage = {
             }
         }
         
-        // БАЗОВЫЕ УПРАЖНЕНИЯ - создаём если их нет
         if (!this.data.exercises || this.data.exercises.length === 0) {
             console.log('Создаём базовые упражнения');
             this.data.exercises = [
@@ -33,16 +32,53 @@ window.Storage = {
     
     save() { 
         localStorage.setItem('gym_tracker_data', JSON.stringify(this.data));
-        console.log('Данные сохранены');
+        this.syncToCloud();
+        console.log('Данные сохранены локально и в облаке');
+    },
+    
+    // Синхронизация с Telegram Cloud Storage
+    syncToCloud() {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
+            const cloud = window.Telegram.WebApp.CloudStorage;
+            const data = JSON.stringify(this.data);
+            cloud.setItem('gym_tracker_data', data, (err) => {
+                if (err) console.log('Ошибка синхронизации с облаком:', err);
+                else console.log('✅ Данные синхронизированы с облаком Telegram');
+            });
+        }
+    },
+
+    loadFromCloud(callback) {
+        if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
+            const cloud = window.Telegram.WebApp.CloudStorage;
+            cloud.getItem('gym_tracker_data', (err, value) => {
+                if (!err && value) {
+                    try {
+                        const cloudData = JSON.parse(value);
+                        this.data = { ...this.data, ...cloudData };
+                        localStorage.setItem('gym_tracker_data', JSON.stringify(this.data));
+                        console.log('✅ Данные загружены из облака Telegram');
+                        if (callback) callback(true);
+                    } catch(e) {
+                        console.log('Ошибка парсинга облачных данных:', e);
+                        if (callback) callback(false);
+                    }
+                } else {
+                    console.log('Нет данных в облаке или ошибка доступа');
+                    if (callback) callback(false);
+                }
+            });
+        } else {
+            console.log('CloudStorage недоступен, используем localStorage');
+            if (callback) callback(false);
+        }
     },
     
     getUser() { return this.data.user; },
     setUser(user) { this.data.user = user; this.save(); },
     
     getExercises() { 
-        // Убеждаемся, что упражнения есть при каждом запросе
         if (!this.data.exercises || this.data.exercises.length === 0) {
-            console.log('getExercises: упражнений нет, создаём');
             this.data.exercises = [
                 { id: '1', name: 'Жим лежа', sets: [], pr: 0 },
                 { id: '2', name: 'Присед', sets: [], pr: 0 },
