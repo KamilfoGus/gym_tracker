@@ -75,9 +75,10 @@
             </div>
 
             <div id="goalCard"></div>
-
-            <!-- Виджет достижений -->
             <div id="achievementsWidget"></div>
+
+            <!-- Кнопка уведомлений -->
+            <div id="notificationsButton"></div>
 
             <button id="checkInBtn" class="btn-primary">✅ ОТМЕТИТЬСЯ СЕГОДНЯ</button>
 
@@ -251,7 +252,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно: График прогресса упражнения -->
+    <!-- График прогресса -->
     <div id="progressChartModal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <h3 id="chartExerciseName">Упражнение</h3>
@@ -266,13 +267,27 @@
         </div>
     </div>
 
-    <!-- Модальное окно: Все достижения -->
+    <!-- Достижения -->
     <div id="achievementsModal" class="modal">
         <div class="modal-content" style="max-width: 400px;">
             <h3>🏆 Все достижения</h3>
             <div id="achievementsFullList"></div>
             <div class="modal-buttons">
                 <button class="btn-cancel" onclick="window.closeModal('achievementsModal')">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notificationsModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <h3>🔔 Настройки уведомлений</h3>
+            <p style="color:#888; font-size:13px; margin-bottom:20px;">
+                Приложение будет напоминать, если ты пропустил тренировку
+            </p>
+            <div id="notificationsSettings"></div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="window.closeModal('notificationsModal')">ЗАКРЫТЬ</button>
             </div>
         </div>
     </div>
@@ -284,6 +299,7 @@
     <script src="modules/history.js"></script>
     <script src="modules/goals.js"></script>
     <script src="modules/achievements.js"></script>
+    <script src="modules/notifications.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
