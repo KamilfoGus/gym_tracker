@@ -120,4 +120,31 @@ document.addEventListener('DOMContentLoaded', () => {
         
         window.addEventListener('dataUpdated', () => {
             console.log('dataUpdated событие - обновляем UI');
-            if (window.User) User.updateUI
+            if (window.User) User.updateUI();
+            if (window.Exercises) Exercises.updateUI();
+            if (window.Calendar) Calendar.updateUI();
+            if (window.History) History.updateUI();
+            if (window.Goals) Goals.renderGoalCard();
+            if (window.Achievements) {
+                Achievements.checkAll();
+                Achievements.renderWidget();
+            }
+        });
+        
+        if (window.User) User.updateUI();
+        if (window.Exercises) Exercises.updateUI();
+        if (window.Calendar) Calendar.updateUI();
+        if (window.History) History.updateUI();
+        if (window.Goals) Goals.renderGoalCard();
+        
+        setupTelegram();
+    }
+});
+
+window.addEventListener('touchstart', function() {}, { passive: false });
+
+document.addEventListener('gesturestart', function(e) {
+    if (e.target.closest('.modal-content')) {
+        e.preventDefault();
+    }
+});
