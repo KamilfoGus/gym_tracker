@@ -93,13 +93,18 @@
                 </div>
             </div>
 
-            <div id="pageCalendar" class="page hidden">
-                <div id="calendarGrid" class="calendar-grid"></div>
-                <div class="weight-chart">
-                    <canvas id="weightChart"></canvas>
-                    <div id="weightStats" class="weight-stats"></div>
-                </div>
-            </div>
+           <div id="pageCalendar" class="page hidden">
+    <div class="calendar-header">
+        <button id="calendarPrev" class="btn-nav">◀</button>
+        <span id="calendarMonthLabel" class="calendar-month-label"></span>
+        <button id="calendarNext" class="btn-nav">▶</button>
+    </div>
+    <div id="calendarGrid" class="calendar-grid"></div>
+    <div class="weight-chart">
+        <canvas id="weightChart"></canvas>
+        <div id="weightStats" class="weight-stats"></div>
+    </div>
+</div>
 
             <div id="pageExercises" class="page hidden">
                 <div class="exercises-section">
