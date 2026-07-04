@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     Achievements.checkAll();
                     Achievements.renderWidget();
                 }
+                if (window.Notifications) {
+                    Notifications.checkReminder();
+                }
                 window.dispatchEvent(new Event('dataUpdated'));
             }
         });
@@ -85,6 +88,10 @@ document.addEventListener('DOMContentLoaded', () => {
         User.init();
         if (window.Exercises) Exercises.init();
         if (window.Goals) Goals.init();
+        if (window.Notifications) {
+            Notifications.init();
+            Notifications.renderSettingsButton();
+        }
         if (window.Achievements) {
             Achievements.checkAll();
             Achievements.renderWidget();
@@ -128,6 +135,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.Achievements) {
                 Achievements.checkAll();
                 Achievements.renderWidget();
+            }
+            if (window.Notifications) {
+                Notifications.checkReminder();
             }
         });
         
