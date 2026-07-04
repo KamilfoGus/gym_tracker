@@ -1,27 +1,64 @@
-/**
- * Модуль календаря и графика веса
- */
-
 window.Calendar = {
     chart: null,
+    currentMonth: new Date().getMonth(),
+    currentYear: new Date().getFullYear(),
 
     init() {
-        this.updateUI();
-    },
-
-    updateUI() {
         this.renderCalendar();
         this.renderWeightChart();
         this.renderWeightStats();
+        this.setupNavigation();
+    },
+
+    setupNavigation() {
+        const prevBtn = document.getElementById('calendarPrev');
+        const nextBtn = document.getElementById('calendarNext');
+
+        if (prevBtn) {
+            prevBtn.onclick = () => {
+                this.currentMonth--;
+                if (this.currentMonth < 0) {
+                    this.currentMonth = 11;
+                    this.currentYear--;
+                }
+                this.renderCalendar();
+                this.renderWeightChart();
+                this.renderWeightStats();
+                this.updateMonthLabel();
+            };
+        }
+
+        if (nextBtn) {
+            nextBtn.onclick = () => {
+                this.currentMonth++;
+                if (this.currentMonth > 11) {
+                    this.currentMonth = 0;
+                    this.currentYear++;
+                }
+                this.renderCalendar();
+                this.renderWeightChart();
+                this.renderWeightStats();
+                this.updateMonthLabel();
+            };
+        }
+
+        this.updateMonthLabel();
+    },
+
+    updateMonthLabel() {
+        const label = document.getElementById('calendarMonthLabel');
+        if (label) {
+            const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Окторябрь', 'Ноябрь', 'Декабрь'];
+            label.textContent = `${monthNames[this.currentMonth]} ${this.currentYear}`;
+        }
     },
 
     renderCalendar() {
         const container = document.getElementById('calendarGrid');
         if (!container) return;
 
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
+        const year = this.currentYear;
+        const month = this.currentMonth;
         
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
@@ -30,7 +67,6 @@ window.Calendar = {
 
         container.innerHTML = '';
         
-        // Дни недели
         const weekDays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         weekDays.forEach(day => {
             const div = document.createElement('div');
@@ -41,7 +77,6 @@ window.Calendar = {
             container.appendChild(div);
         });
 
-        // Смещение для понедельника
         let startOffset = (firstDay.getDay() + 6) % 7;
         for (let i = 0; i < startOffset; i++) {
             const div = document.createElement('div');
@@ -51,7 +86,6 @@ window.Calendar = {
             container.appendChild(div);
         }
 
-        // Дни месяца
         for (let d = 1; d <= lastDay.getDate(); d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
             const isChecked = checkIns.includes(dateStr);
@@ -69,16 +103,83 @@ window.Calendar = {
         if (!ctx) return;
 
         const history = Storage.getWeightHistory();
-        const last30 = history.slice(-30);
         
-        const labels = last30.map(w => {
-            const date = w.date.split('-');
-            return `${date[2]}/${date[1]}`;
+        const year = this.currentYear;
+        const month = this.currentMonth;
+        
+        const monthData = history.filter(w => {
+            const date = new Date(w.date);
+            return date.getFullYear() === year && date.getMonth() === month;
+        });
+
+        monthData.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        const labels = monthData.map(w => {
+            const d = new Date(w.date);
+            return d.getDate().toString();
         });
         
-        const weights = last30.map(w => w.weight);
+        const weights = monthData.map(w => w.weight);
 
         if (this.chart) this.chart.destroy();
+
+        if (weights.length === 0) {
+            this.chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Нет данных'],
+                    datasets: [{
+                        label: 'Вес (кг)',
+                        data: [0],
+                        borderColor: '#FF4444',
+                        backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#FFFFFF' }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: (context) => {
+                                    if (context.raw === 0) return 'Нет данных';
+                                    return `${context.raw} кг`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            grid: { color: '#2A2A2A' },
+                            ticks: { color: '#FFFFFF' },
+                            title: {
+                                display: true,
+                                text: 'Вес (кг)',
+                                color: '#888888'
+                            },
+                            min: 0,
+                            max: 1
+                        },
+                        x: {
+                            grid: { color: '#2A2A2A' },
+                            ticks: { 
+                                color: '#FFFFFF',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+            return;
+        }
 
         this.chart = new Chart(ctx, {
             type: 'line',
@@ -141,19 +242,42 @@ window.Calendar = {
         const history = Storage.getWeightHistory();
         const user = Storage.getUser();
         
-        if (!user || history.length === 0) return;
+        if (!user || history.length === 0) {
+            container.innerHTML = `
+                <div class="weight-stat">
+                    <div class="weight-stat-label">НЕТ ДАННЫХ</div>
+                    <div class="weight-stat-value" style="font-size:14px;">Начните тренировки</div>
+                </div>
+            `;
+            return;
+        }
 
-        const startWeight = user.startWeight || history[0]?.weight || user.weight;
-        const currentWeight = user.weight;
+        const year = this.currentYear;
+        const month = this.currentMonth;
+        
+        const monthData = history.filter(w => {
+            const date = new Date(w.date);
+            return date.getFullYear() === year && date.getMonth() === month;
+        });
+
+        if (monthData.length === 0) {
+            container.innerHTML = `
+                <div class="weight-stat">
+                    <div class="weight-stat-label">НЕТ ДАННЫХ</div>
+                    <div class="weight-stat-value" style="font-size:14px;">За этот месяц</div>
+                </div>
+            `;
+            return;
+        }
+
+        const startWeight = monthData[0].weight;
+        const currentWeight = monthData[monthData.length - 1].weight;
         const change = (currentWeight - startWeight).toFixed(1);
         const changePercent = ((change / startWeight) * 100).toFixed(1);
-        
-        const minWeight = Math.min(...history.map(w => w.weight));
-        const maxWeight = Math.max(...history.map(w => w.weight));
 
         container.innerHTML = `
             <div class="weight-stat">
-                <div class="weight-stat-label">НАЧАЛЬНЫЙ</div>
+                <div class="weight-stat-label">НАЧАЛО МЕСЯЦА</div>
                 <div class="weight-stat-value">${startWeight} кг</div>
             </div>
             <div class="weight-stat">
@@ -167,5 +291,12 @@ window.Calendar = {
                 </div>
             </div>
         `;
+    },
+
+    updateUI() {
+        this.renderCalendar();
+        this.renderWeightChart();
+        this.renderWeightStats();
+        this.updateMonthLabel();
     }
 };
