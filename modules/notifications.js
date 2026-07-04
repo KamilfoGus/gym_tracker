@@ -95,7 +95,6 @@ window.Notifications = {
 
     // Настройка интерфейса уведомлений
     setupUI() {
-        // Добавляем секцию настроек в модалку
         const container = document.getElementById('notificationsSettings');
         if (!container) return;
 
