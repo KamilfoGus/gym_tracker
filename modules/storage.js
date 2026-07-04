@@ -1,5 +1,12 @@
 window.Storage = {
-    data: { user: null, exercises: [], weightHistory: [], checkIns: [], goals: { active: null, history: [] } },
+    data: { 
+        user: null, 
+        exercises: [], 
+        weightHistory: [], 
+        checkIns: [], 
+        goals: { active: null, history: [] },
+        achievements: { earned: [] }
+    },
     
     load() {
         const saved = localStorage.getItem('gym_tracker_data');
@@ -25,6 +32,7 @@ window.Storage = {
         if (!this.data.weightHistory) this.data.weightHistory = [];
         if (!this.data.checkIns) this.data.checkIns = [];
         if (!this.data.goals) this.data.goals = { active: null, history: [] };
+        if (!this.data.achievements) this.data.achievements = { earned: [] };
         
         console.log('Загружено упражнений:', this.data.exercises.length);
         return this.data;
@@ -36,7 +44,6 @@ window.Storage = {
         console.log('Данные сохранены локально и в облаке');
     },
     
-    // Синхронизация с Telegram Cloud Storage
     syncToCloud() {
         if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.CloudStorage) {
             const cloud = window.Telegram.WebApp.CloudStorage;
@@ -110,5 +117,11 @@ window.Storage = {
         if (!this.data.goals) this.data.goals = { active: null, history: [] };
         return this.data.goals; 
     },
-    setGoals(goals) { this.data.goals = goals; this.save(); }
+    setGoals(goals) { this.data.goals = goals; this.save(); },
+    
+    getAchievements() {
+        if (!this.data.achievements) this.data.achievements = { earned: [] };
+        return this.data.achievements;
+    },
+    setAchievements(achievements) { this.data.achievements = achievements; this.save(); }
 };
