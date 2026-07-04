@@ -354,6 +354,94 @@ window.Exercises = {
         const progress = ((last - first) / first) * 100;
         return Math.max(0, Math.min(100, Math.round(progress)));
     },
+
+    // НОВЫЙ МЕТОД: показать график прогресса упражнения
+    showProgressChart(exerciseId) {
+        const ex = Storage.getExercises().find(e => e.id === exerciseId);
+        if (!ex) return;
+
+        if (ex.sets.length < 2) {
+            alert(`📊 ${ex.name}\n\nНедостаточно данных для графика.\nНужно минимум 2 подхода.`);
+            return;
+        }
+
+        const sortedSets = [...ex.sets].sort((a, b) => new Date(a.date) - new Date(b.date));
+        
+        const labels = sortedSets.map(s => {
+            const d = new Date(s.date);
+            return `${d.getDate()}.${d.getMonth()+1}`;
+        });
+        
+        const data = sortedSets.map(s => this.calculateOneRM(s.weight, s.reps));
+
+        const modal = document.getElementById('progressChartModal');
+        const canvas = document.getElementById('progressChartCanvas');
+        if (!modal || !canvas) return;
+
+        modal.classList.add('active');
+
+        if (window.progressChart) {
+            window.progressChart.destroy();
+        }
+
+        const ctx = canvas.getContext('2d');
+        window.progressChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `1ПМ (${ex.name})`,
+                    data: data,
+                    borderColor: '#FF4444',
+                    backgroundColor: 'rgba(255, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#FF4444',
+                    pointBorderColor: '#FFFFFF',
+                    pointBorderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        labels: { color: '#FFFFFF' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => `1ПМ: ${context.raw} кг`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#2A2A2A' },
+                        ticks: { color: '#FFFFFF' },
+                        title: {
+                            display: true,
+                            text: 'Вес (кг)',
+                            color: '#888888'
+                        }
+                    },
+                    x: {
+                        grid: { color: '#2A2A2A' },
+                        ticks: { 
+                            color: '#FFFFFF',
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
+                }
+            }
+        });
+
+        document.getElementById('chartExerciseName').textContent = ex.name;
+        document.getElementById('chartExercisePR').textContent = `${ex.pr || 0} кг`;
+        document.getElementById('chartTotalSets').textContent = `${ex.sets.length} подходов`;
+    },
     
     updateUI() {
         const exercises = Storage.getExercises();
@@ -403,6 +491,7 @@ window.Exercises = {
                                 <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showAddSet('${ex.id}','${this.escapeHtml(ex.name)}')">➕ Добавить подход</button>
                                 <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showCalculator('${ex.id}')">📐 Калькулятор 1RM</button>
                                 <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showHistory('${ex.id}')">📊 История</button>
+                                <button class="btn-secondary" style="flex:1;" onclick="event.stopPropagation(); window.Exercises.showProgressChart('${ex.id}')">📈 График</button>
                             </div>
                             ${!isBase ? `<button class="btn-delete-exercise" onclick="event.stopPropagation(); window.Exercises.deleteExercise('${ex.id}','${this.escapeHtml(ex.name)}')">🗑️ Удалить упражнение</button>` : ''}
                         </div>
